@@ -1,5 +1,7 @@
 package werthen.murilo;
 
+import java.util.ArrayList;
+
 public class Process {
 	
 	private int pid;
@@ -12,12 +14,15 @@ public class Process {
 	private int secondTimeToBlock;
 	private int halfBlockTime;
 	
-	public Process (int pid, int submitionTime, int priority, int serviceTime, int blockTime) {
+	private ArrayList<ProcessPage> pages = new ArrayList<>();
+	
+	public Process (int pid, int submitionTime, int priority, int serviceTime, int blockTime, ArrayList<ProcessPage> pages) {
 		this.pid = pid;
 		this.submitionTime = submitionTime;
 		this.priority = priority;
 		this.serviceTime = serviceTime;
 		this.blockTime = blockTime;
+		this.pages = pages;
 		checkBlockTime();
 	}
 
@@ -46,6 +51,14 @@ public class Process {
 		} else {
 			return false;
 		}
+	}
+	
+	public ArrayList<ProcessPage> getPages() {
+		return pages;
+	}
+
+	public void setPages(ArrayList<ProcessPage> pages) {
+		this.pages = pages;
 	}
 
 	public int getPid() {
