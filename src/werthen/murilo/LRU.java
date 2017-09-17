@@ -8,14 +8,15 @@ public class LRU extends Scheduling {
 
 	@Override
 	public void changePage (ProcessPage pp) {
-		ProcessPage lastRefer;
+		ProcessPage oldPageRefer = mainMemory.get(0);
+		int oldIndexRefer = 0;
 		for (int i = 0; i < mainMemory.size(); i++) {
-			int lastIndex = 0;
-			for (int j = refer.size() - 1; j >= 0; j--) {
-				if (mainMemory.get(i).getIndexPage() == refer.get(j).getIndexPage()) {
-					lastIndex++;
-				}
+			if (mainMemory.get(i).getRefer() > oldPageRefer.getRefer()) {
+				oldPageRefer = mainMemory.get(i);
+				oldIndexRefer = i;
 			}
 		}
+		mainMemory.remove(oldIndexRefer);
+		mainMemory.add(oldIndexRefer, pp);
 	}
 }

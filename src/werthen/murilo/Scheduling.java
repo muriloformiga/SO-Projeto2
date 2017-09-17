@@ -12,8 +12,7 @@ import java.util.Scanner;
 public abstract class Scheduling {
 
 	public static ArrayList<ProcessPage> mainMemory = new ArrayList<>();
-	public static ArrayList<ProcessPage> refer = new ArrayList<>();
-	
+
 	public static ArrayList<Process> ready = new ArrayList<>();
 	public static ArrayList<Process> blocked = new ArrayList<>();
 	public static ArrayList<Process> incoming = new ArrayList<>();
@@ -23,6 +22,8 @@ public abstract class Scheduling {
 	public boolean changeProcess = true;
 	private int countQuantum = 0;
 	private int quantum;
+	private int faults = 0;
+	int inMemory = 0;
 
 	protected int alpha;
 	private int memoryCapacity;
@@ -32,7 +33,7 @@ public abstract class Scheduling {
 	protected Scanner scanFile2;
 
 	private File inFile1 = new File("cenario1.txt");
-	private File inFile2 = new File("referencias1-teste.txt");
+	private File inFile2 = new File("referencias1.txt");
 	private File outFile = new File("resultado-rr-cenario1.txt");
 
 	public Scheduling (int alpha, int quantum, int memoryCapacity) {
@@ -60,6 +61,7 @@ public abstract class Scheduling {
 			exibe();
 			unitTime++;
 		}
+		System.out.println("*** Total de Faltas: " + faults + " : " + inMemory + " ***");
 		//saveProcessMetrics();
 	}
 
@@ -67,20 +69,20 @@ public abstract class Scheduling {
 
 		while (scanFile1.hasNext()) {
 
-			String linePage = scanFile2.nextLine().replace(",", " ").replace(":", " ");
-			Scanner scan = new Scanner(linePage);
-			int idPage = scan.nextInt();
+			String linePage = scanFile2.nextLine().replace(",", " ").replace(":", " ").replace(";", " ");
+			Scanner scanPage = new Scanner(linePage);
+			int idPage = scanPage.nextInt();
 			ArrayList<ProcessPage> processPages = new ArrayList<>();
 
-			while (scan.hasNextInt()) {
-				int time = scan.nextInt();
-				int index = scan.nextInt();
+			while (scanPage.hasNextInt()) {
+				int time = scanPage.nextInt();
+				int index = scanPage.nextInt();
 				ProcessPage page = new ProcessPage(idPage + 1, time, index);
 				processPages.add(page);
 			}
 
-			String line = scanFile1.nextLine().replace(",", " ");
-			Scanner scanLine = new Scanner(line);
+			String lineProcess = scanFile1.nextLine().replace(",", " ");
+			Scanner scanLine = new Scanner(lineProcess);
 			Process process = new Process(scanLine.nextInt(),
 					scanLine.nextInt(), scanLine.nextInt(), scanLine.nextInt(),
 					scanLine.nextInt(), processPages);
@@ -90,19 +92,6 @@ public abstract class Scheduling {
 	}
 
 	protected void distributeProcess (Process p) {
-		/*
-		for (int i = 0; i < p.getPages().size(); i++) {
-			System.out.println(p.getPages().get(i).getIdProcess());
-			System.out.println(p.getPages().get(i).getTimePage());
-			System.out.println(p.getPages().get(i).getIndexPage());
-			try {
-				Thread.sleep(500);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-		 */
 		if (p.getSubmitionTime() > 0) {
 			incoming.add(p);
 		} else {
@@ -118,42 +107,69 @@ public abstract class Scheduling {
 		if (countQuantum % quantum == 0 || changeProcess) {
 			if (changeProcess) {
 				countQuantum = 0;
-				prepareProcess();
+				if (ready.size() > 0) {
+					running = ready.get(0);
+					ready.remove(0);
+				} else {
+					running = null;
+				}
 			} else {
 				if (running != null) {
 					ready.add(running);
 				}
 				changeProcess = true;
-				prepareProcess();
+				if (ready.size() > 0) {
+					running = ready.get(0);
+					ready.remove(0);
+				} else {
+					running = null;
+				}
 			}
 		}
 		countQuantum++;
 	}
-
+	
+	private boolean memoryContains (ProcessPage pp) {
+		
+		for (int i = 0; i < mainMemory.size(); i++) {
+			if (mainMemory.get(i).getIdProcess() == pp.getIdProcess() &&
+					mainMemory.get(i).getIndexPage() == pp.getIndexPage()) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	private void setPageOnMemory () {
 		if (running != null) {
 			for (int i = 0; i < running.getPages().size(); i++) {
-				running.getPages().get(i).setTimePage(running.getPages().get(i).getTimePage() - 1);
 				if (running.getPages().get(i).getTimePage() == 0) {
-					refer.add(running.getPages().get(i));
-					if (mainMemory.size() <= memoryCapacity) {
-						mainMemory.add(running.getPages().get(i));
-					} else if (mainMemory.contains(running.getPages().get(i))) {
+					running.getPages().get(i).setRefer(0);
+					if (memoryContains(running.getPages().get(i))) {
+						System.out.println("YES!");
+						inMemory++;
 						continue;
+					} else if (mainMemory.size() < memoryCapacity) {
+						mainMemory.add(running.getPages().get(i));
 					} else {
 						changePage(running.getPages().get(i));
-						System.out.println("Fault!");
+						faults++;
 					}
 				}
+				running.getPages().get(i).setTimePage(running.getPages().get(i).getTimePage() - 1);
 			}
-		}
+		}//Total de Faltas: 30828 : 264026
 	}
-	
+
 	public void changePage (ProcessPage pp) {
-				
+		
+		// this method will be override by another
 	}
-	
+
 	public void executeProcess () {
+		for (int i = 0; i < mainMemory.size(); i++) {
+			mainMemory.get(i).setRefer(mainMemory.get(i).getRefer() + 1);
+		}
 		if (running != null) {
 			running.setServiceTime(running.getServiceTime() - 1);
 			if (running.getServiceTime() == 0) {
@@ -261,22 +277,9 @@ public abstract class Scheduling {
 	 */
 
 	public void exibe () {
-		System.out.println("----- Time " + unitTime + " -----");
-		System.out.println("----- Running -----");
-		if (running != null) {
-			System.out.println(running.getPid() + " : " + running.getServiceTime());
-		}
-		System.out.println("----- Ready -----");
-		for (Process p : ready) {
-			System.out.println(p.getPid() + " : " + p.getServiceTime());
-		}
-		System.out.println("----- Blocked -----");
-		for (Process p : blocked) {
-			System.out.println(p.getPid() + " : " + p.getServiceTime());
-		}
-		System.out.println("----- Incoming -----");
-		for (Process p : incoming) {
-			System.out.println(p.getPid() + " : " + p.getServiceTime());
+		for (int i = 0; i < mainMemory.size(); i++) {
+			System.out.println(i + ": " + mainMemory.get(i).getIdProcess() + " - " + mainMemory.get(i).getIndexPage() + " - " +
+					mainMemory.get(i).getRefer());
 		}
 		System.out.println("");
 	}

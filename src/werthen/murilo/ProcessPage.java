@@ -5,14 +5,24 @@ public class ProcessPage {
 	private int idProcess;
     private int timePage;
     private int indexPage;
+    private int refer;
     
     public ProcessPage (int idProcess, int timePage, int indexPage) {
     	this.idProcess = idProcess;
     	this.timePage = timePage;
     	this.indexPage = indexPage;
+    	this.refer = 0;
     }
     
-    public int getIdProcess () {
+    public int getRefer() {
+		return refer;
+	}
+    
+    public void setRefer(int refer) {
+		this.refer = refer;
+	}
+    
+	public int getIdProcess () {
         return idProcess;
     }
 
