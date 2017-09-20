@@ -32,9 +32,9 @@ public abstract class Scheduling {
 	protected Scanner scanFile1;
 	protected Scanner scanFile2;
 
-	private File inFile1 = new File("cenario1.txt");
-	private File inFile2 = new File("referencias1.txt");
-	private File outFile = new File("resultado-rr-cenario1.txt");
+	private File inFile1 = new File("cenario4.txt");
+	private File inFile2 = new File("referencias4.txt");
+	private File outFile = new File("resultado-cenario1-30.txt");
 
 	public Scheduling (int alpha, int quantum, int memoryCapacity) {
 		this.memoryCapacity = memoryCapacity;
@@ -158,7 +158,7 @@ public abstract class Scheduling {
 				}
 				running.getPages().get(i).setTimePage(running.getPages().get(i).getTimePage() - 1);
 			}
-		}//Total de Faltas: 30828 : 264026
+		}
 	}
 
 	public void changePage (ProcessPage pp) {
