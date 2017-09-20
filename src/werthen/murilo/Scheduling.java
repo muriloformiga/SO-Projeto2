@@ -32,8 +32,8 @@ public abstract class Scheduling {
 	protected Scanner scanFile1;
 	protected Scanner scanFile2;
 
-	private File inFile1 = new File("cenario4.txt");
-	private File inFile2 = new File("referencias4.txt");
+	private File inFile1 = new File("cenario1.txt");
+	private File inFile2 = new File("referencias1.txt");
 	private File outFile = new File("resultado-cenario1-30.txt");
 
 	public Scheduling (int alpha, int quantum, int memoryCapacity) {

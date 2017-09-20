@@ -19,5 +19,8 @@ public class Main {
 		
 		// *** Total de Faltas: 271875 : 2827140 *** 20
 		// *** Total de Faltas: 271865 : 2827141 *** 30
+		
+		Otimo otm = new Otimo(50, 10, 20);
+		otm.startScheduling();
 	}
 }
